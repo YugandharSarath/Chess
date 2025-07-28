@@ -32,16 +32,21 @@ Build a React-based chess game that allows **two players to play a full match** 
 
 ### ⚠️ Edge Cases & Constraints
 
-| Case                                 | What Should Happen                                                          |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| A move places your own king in check | The move must be blocked (illegal move).                                    |
-| Pawn reaches the last rank           | Must prompt for promotion (queen, rook, bishop, or knight).                 |
-| Checkmate scenario                   | Show `White wins by checkmate` or `Black wins by checkmate` and stop moves. |
-| Stalemate                            | Show `Draw by stalemate`.                                                   |
-| Only kings remain                    | Show `Draw: Only kings remain`.                                             |
-| Click after game over                | Ignore further moves until restarted.                                       |
-| Move history format                  | Must strictly follow standard notation with move numbers.                   |
-| Board rendering                      | Must always show **exactly 64 cells** with proper piece symbols.            |
+- Any move that would place your own king in check must be treated as illegal and should not be allowed.
+
+- When a pawn reaches the last rank, the game must prompt the player to promote it to a queen, rook, bishop, or knight.
+
+- If a checkmate occurs, the game should display either “White wins by checkmate” or “Black wins by checkmate” and prevent any further moves.
+
+- If a stalemate happens, the game should display “Draw by stalemate.”
+
+- If the board reaches a state where only the two kings remain, it should display “Draw: Only kings remain.”
+
+- After the game ends, any clicks or move attempts should be ignored until the game is restarted.
+
+- The move history must always follow standard chess notation, including proper numbering for each turn.
+
+- The board must consistently render exactly 64 squares, each showing the correct piece symbols.       |
 
 ---
 
