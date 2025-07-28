@@ -17,6 +17,14 @@
     "Must show correct move history format",
     "Must ignore clicks after game over until restart"
   ],
+"companies":[
+  "Turing.com",
+  "CRED",
+  "Razorpay",
+  "Meesho",
+  "FrontRow",
+  "InterviewBit / Scaler Academy"
+], 
   "duration": "3-4 hours",
   "test_cases": [
     "Initial status should show 'White to move'",
