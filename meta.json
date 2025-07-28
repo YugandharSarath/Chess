@@ -1,6 +1,28 @@
 {
-  "difficulty": "Medium",
-  "topics": ["React", "Chess", "Hover Events", "2D Grid", "TSX"],
-  "companies": ["Paytm", "Zeta", "Microsoft"],
-  "duration": "25 min"
+  "title": "React Chess Game",
+  "description": "A full chess game implementation in React with move validation, check/checkmate detection, pawn promotion, and a game-over modal.",
+  "difficulty": "hard",
+  "topics": ["React", "State Management", "Algorithms", "Game Development"],
+  "features": [
+    "Standard 8x8 chessboard",
+    "Legal move validation",
+    "Check, checkmate, stalemate detection",
+    "Pawn promotion",
+    "Move history tracking",
+    "Game-over modal"
+  ],
+  "constraints": [
+    "Must always render 64 cells",
+    "Must block illegal moves (self-check not allowed)",
+    "Must show correct move history format",
+    "Must ignore clicks after game over until restart"
+  ],
+  "duration": "3-4 hours",
+  "test_cases": [
+    "Initial status should show 'White to move'",
+    "Click restart resets board and history",
+    "Pawn reaching last rank triggers promotion prompt",
+    "Checkmate detection works for a forced scenario",
+    "Move history correctly increments"
+  ]
 }

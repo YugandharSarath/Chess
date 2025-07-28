@@ -1,13 +1,11 @@
 import React from "react";
-import King from "./King";
-import "./King.css";
+import ChessBoard from "./ChessBoard";
 
 function App() {
   return (
     <div className="App">
-      <h1>♔ King Move Visualizer</h1>
-
-      <King />
+      <h1>React Chess</h1>
+      <ChessBoard />
     </div>
   );
 }
