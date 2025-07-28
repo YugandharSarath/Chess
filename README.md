@@ -1,1 +1,1 @@
-# King-moves-visualizer-
+# Chess game-
