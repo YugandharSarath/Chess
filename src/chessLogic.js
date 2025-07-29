@@ -20,7 +20,11 @@ export function isValidMove(board, fromRow, fromCol, toRow, toCol, turn) {
     case "knight":
       return knightMove(fromRow, fromCol, toRow, toCol);
     case "king":
-      return kingMove(fromRow, fromCol, toRow, toCol);
+      return (
+        kingMove(fromRow, fromCol, toRow, toCol) ||
+        canCastle(board, piece.color, fromRow, fromCol, toRow, toCol)
+      );
+
     default:
       return false;
   }
@@ -98,7 +102,11 @@ function kingMove(fr, fc, tr, tc) {
 function findKing(board, color) {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
-      if (board[r][c] && board[r][c].type === "king" && board[r][c].color === color) {
+      if (
+        board[r][c] &&
+        board[r][c].type === "king" &&
+        board[r][c].color === color
+      ) {
         return [r, c];
       }
     }
@@ -120,11 +128,15 @@ function isSquareAttacked(board, row, col, byColor) {
   return false;
 }
 
-
 export function isInCheck(board, color) {
   const kingPos = findKing(board, color);
   if (!kingPos) return false;
-  return isSquareAttacked(board, kingPos[0], kingPos[1], color === "w" ? "b" : "w");
+  return isSquareAttacked(
+    board,
+    kingPos[0],
+    kingPos[1],
+    color === "w" ? "b" : "w"
+  );
 }
 
 export function hasAnyLegalMove(board, color) {
@@ -135,7 +147,7 @@ export function hasAnyLegalMove(board, color) {
         for (let tr = 0; tr < 8; tr++) {
           for (let tc = 0; tc < 8; tc++) {
             if (isValidMove(board, fr, fc, tr, tc, color)) {
-              const tempBoard = board.map(r => [...r]);
+              const tempBoard = board.map((r) => [...r]);
               tempBoard[tr][tc] = piece;
               tempBoard[fr][fc] = null;
               if (!isInCheck(tempBoard, color)) {
@@ -158,4 +170,52 @@ export function isOnlyKings(board) {
     }
   }
   return count === 2; // only two kings remain
+}
+
+function canCastle(board, color, fromRow, fromCol, toRow, toCol) {
+  if (color === "w" && fromRow === 7 && fromCol === 4) {
+    // King-side
+    if (toRow === 7 && toCol === 6) {
+      return (
+        board[7][5] === null &&
+        board[7][6] === null &&
+        board[7][7]?.type === "rook" &&
+        board[7][7]?.color === "w"
+      );
+    }
+    // Queen-side
+    if (toRow === 7 && toCol === 2) {
+      return (
+        board[7][1] === null &&
+        board[7][2] === null &&
+        board[7][3] === null &&
+        board[7][0]?.type === "rook" &&
+        board[7][0]?.color === "w"
+      );
+    }
+  }
+
+  if (color === "b" && fromRow === 0 && fromCol === 4) {
+    // King-side
+    if (toRow === 0 && toCol === 6) {
+      return (
+        board[0][5] === null &&
+        board[0][6] === null &&
+        board[0][7]?.type === "rook" &&
+        board[0][7]?.color === "b"
+      );
+    }
+    // Queen-side
+    if (toRow === 0 && toCol === 2) {
+      return (
+        board[0][1] === null &&
+        board[0][2] === null &&
+        board[0][3] === null &&
+        board[0][0]?.type === "rook" &&
+        board[0][0]?.color === "b"
+      );
+    }
+  }
+
+  return false;
 }

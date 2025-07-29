@@ -66,13 +66,26 @@ export default function ChessBoard() {
           newBoard[row][col] = movingPiece;
           newBoard[fromRow][fromCol] = null;
 
+          // 🏰 Handle castling rook movement
+          if (movingPiece.type === "king" && Math.abs(col - fromCol) === 2) {
+            if (col === 6) {
+              // King-side castling
+              newBoard[row][5] = newBoard[row][7];
+              newBoard[row][7] = null;
+            } else if (col === 2) {
+              // Queen-side castling
+              newBoard[row][3] = newBoard[row][0];
+              newBoard[row][0] = null;
+            }
+          }
+
           // Prevent illegal self-check
           if (isInCheck(newBoard, turn)) {
             setSelected(null);
             return;
           }
 
-          // Pawn Promotion check
+          // ♙ Pawn Promotion
           let promoted = false;
           let promoPiece = null;
           if (
@@ -90,8 +103,14 @@ export default function ChessBoard() {
           const toSq = indexToSquare(row, col);
           const moveNum = Math.floor(moveHistory.length / 2) + 1;
           let moveString = `${moveNum}. ${fromSq}-${toSq}`;
+
           if (promoted) {
             moveString += `=${promoPiece.type.charAt(0).toUpperCase()}`;
+          }
+
+          // Annotate castling in move history
+          if (movingPiece.type === "king" && Math.abs(col - fromCol) === 2) {
+            moveString += col === 6 ? " O-O" : " O-O-O";
           }
 
           setMoveHistory([...moveHistory, moveString]);
@@ -101,9 +120,15 @@ export default function ChessBoard() {
           const nextTurn = turn === "w" ? "b" : "w";
 
           // Game End Checks
-          if (isInCheck(newBoard, nextTurn) && !hasAnyLegalMove(newBoard, nextTurn)) {
+          if (
+            isInCheck(newBoard, nextTurn) &&
+            !hasAnyLegalMove(newBoard, nextTurn)
+          ) {
             setStatus(`${turn === "w" ? "White" : "Black"} wins by checkmate`);
-          } else if (!isInCheck(newBoard, nextTurn) && !hasAnyLegalMove(newBoard, nextTurn)) {
+          } else if (
+            !isInCheck(newBoard, nextTurn) &&
+            !hasAnyLegalMove(newBoard, nextTurn)
+          ) {
             setStatus("Draw by stalemate");
           } else if (isOnlyKings(newBoard)) {
             setStatus("Draw: Only kings remain");
@@ -114,6 +139,7 @@ export default function ChessBoard() {
           setTurn(nextTurn);
         }
       }
+
       setSelected(null);
     } else {
       if (piece && piece.color === turn) {
@@ -132,7 +158,13 @@ export default function ChessBoard() {
 
   return (
     <div style={{ display: "flex", gap: "20px" }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <div className="board">
           {board.map((row, rIndex) =>
             row.map((cell, cIndex) => {
@@ -142,9 +174,9 @@ export default function ChessBoard() {
               return (
                 <div
                   key={`${rIndex}-${cIndex}`}
-                  className={`cell ${(rIndex + cIndex) % 2 === 0 ? "light" : "dark"} ${
-                    isSelected ? "hovered" : ""
-                  }`}
+                  className={`cell ${
+                    (rIndex + cIndex) % 2 === 0 ? "light" : "dark"
+                  } ${isSelected ? "hovered" : ""}`}
                   onClick={() => handleCellClick(rIndex, cIndex)}
                 >
                   {cell ? cell.symbol : ""}
