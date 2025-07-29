@@ -62,14 +62,5 @@ Build a **React-based chess game** that allows **two players** to play a full ma
 * The board must always render **exactly 64 squares** and reflect correct piece positions using chess symbols (♙, ♘, ♖, etc.).
 * If only the two kings remain on the board, declare the game a **draw due to insufficient material**.
 
----
 
-### 🧪 (Optional for Devs) Testing Expectations
-
-* Unit tests for move validation per piece.
-* Tests for check, checkmate, and stalemate conditions.
-* Tests for castling and pawn promotion behavior.
-* Tests for board reset and status updates.
-
----
 
