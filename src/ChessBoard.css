@@ -32,3 +32,19 @@
   background-color: #87cefa !important;
   box-shadow: inset 0 0 0 3px #3b82f6;
 }
+
+.cell div[draggable="true"] {
+  cursor: grab;
+}
+
+.cell div[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Optional: visual cue on drag-over (if you add a 'drag-over' class dynamically) */
+.drag-over {
+  background-color: #add8e6 !important;
+  outline: 2px dashed #3b82f6;
+  outline-offset: -2px;
+  transition: background-color 0.2s ease;
+}

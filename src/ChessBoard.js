@@ -51,101 +51,94 @@ export default function ChessBoard() {
     return { type: newType, color: pieceColor, symbol: newSymbol };
   };
 
-  const handleCellClick = (row, col) => {
-    const piece = board[row][col];
+  const handleMove = (fromRow, fromCol, toRow, toCol) => {
+    const movingPiece = board[fromRow][fromCol];
 
-    if (selected) {
-      const [fromRow, fromCol] = selected;
-      const movingPiece = board[fromRow][fromCol];
+    if (!movingPiece || movingPiece.color !== turn) return;
 
-      if (movingPiece && movingPiece.color === turn) {
-        if (isValidMove(board, fromRow, fromCol, row, col, turn)) {
-          const newBoard = board.map((r) => [...r]);
+    if (!isValidMove(board, fromRow, fromCol, toRow, toCol, turn)) return;
 
-          // Perform move
-          newBoard[row][col] = movingPiece;
-          newBoard[fromRow][fromCol] = null;
+    const newBoard = board.map((r) => [...r]);
+    newBoard[toRow][toCol] = movingPiece;
+    newBoard[fromRow][fromCol] = null;
 
-          // 🏰 Handle castling rook movement
-          if (movingPiece.type === "king" && Math.abs(col - fromCol) === 2) {
-            if (col === 6) {
-              // King-side castling
-              newBoard[row][5] = newBoard[row][7];
-              newBoard[row][7] = null;
-            } else if (col === 2) {
-              // Queen-side castling
-              newBoard[row][3] = newBoard[row][0];
-              newBoard[row][0] = null;
-            }
-          }
-
-          // Prevent illegal self-check
-          if (isInCheck(newBoard, turn)) {
-            setSelected(null);
-            return;
-          }
-
-          // ♙ Pawn Promotion
-          let promoted = false;
-          let promoPiece = null;
-          if (
-            movingPiece.type === "pawn" &&
-            ((movingPiece.color === "w" && row === 0) ||
-              (movingPiece.color === "b" && row === 7))
-          ) {
-            promoPiece = promotePawn(movingPiece.color);
-            newBoard[row][col] = promoPiece;
-            promoted = true;
-          }
-
-          // Move notation
-          const fromSq = indexToSquare(fromRow, fromCol);
-          const toSq = indexToSquare(row, col);
-          const moveNum = Math.floor(moveHistory.length / 2) + 1;
-          let moveString = `${moveNum}. ${fromSq}-${toSq}`;
-
-          if (promoted) {
-            moveString += `=${promoPiece.type.charAt(0).toUpperCase()}`;
-          }
-
-          // Annotate castling in move history
-          if (movingPiece.type === "king" && Math.abs(col - fromCol) === 2) {
-            moveString += col === 6 ? " O-O" : " O-O-O";
-          }
-
-          setMoveHistory([...moveHistory, moveString]);
-          setBoard(newBoard);
-
-          // Next turn
-          const nextTurn = turn === "w" ? "b" : "w";
-
-          // Game End Checks
-          if (
-            isInCheck(newBoard, nextTurn) &&
-            !hasAnyLegalMove(newBoard, nextTurn)
-          ) {
-            setStatus(`${turn === "w" ? "White" : "Black"} wins by checkmate`);
-          } else if (
-            !isInCheck(newBoard, nextTurn) &&
-            !hasAnyLegalMove(newBoard, nextTurn)
-          ) {
-            setStatus("Draw by stalemate");
-          } else if (isOnlyKings(newBoard)) {
-            setStatus("Draw: Only kings remain");
-          } else {
-            setStatus(nextTurn === "w" ? "White to move" : "Black to move");
-          }
-
-          setTurn(nextTurn);
-        }
-      }
-
-      setSelected(null);
-    } else {
-      if (piece && piece.color === turn) {
-        setSelected([row, col]);
+    // Handle castling
+    if (movingPiece.type === "king" && Math.abs(toCol - fromCol) === 2) {
+      if (toCol === 6) {
+        newBoard[toRow][5] = newBoard[toRow][7];
+        newBoard[toRow][7] = null;
+      } else if (toCol === 2) {
+        newBoard[toRow][3] = newBoard[toRow][0];
+        newBoard[toRow][0] = null;
       }
     }
+
+    // Prevent illegal move into check
+    if (isInCheck(newBoard, turn)) return;
+
+    let promoted = false;
+    let promoPiece = null;
+    if (
+      movingPiece.type === "pawn" &&
+      ((movingPiece.color === "w" && toRow === 0) ||
+        (movingPiece.color === "b" && toRow === 7))
+    ) {
+      promoPiece = promotePawn(movingPiece.color);
+      newBoard[toRow][toCol] = promoPiece;
+      promoted = true;
+    }
+
+    // Move notation
+    const fromSq = indexToSquare(fromRow, fromCol);
+    const toSq = indexToSquare(toRow, toCol);
+    const moveNum = Math.floor(moveHistory.length / 2) + 1;
+    let moveString = `${moveNum}. ${fromSq}-${toSq}`;
+
+    if (promoted) {
+      moveString += `=${promoPiece.type.charAt(0).toUpperCase()}`;
+    }
+
+    if (movingPiece.type === "king" && Math.abs(toCol - fromCol) === 2) {
+      moveString += toCol === 6 ? " O-O" : " O-O-O";
+    }
+
+    setMoveHistory([...moveHistory, moveString]);
+    setBoard(newBoard);
+
+    const nextTurn = turn === "w" ? "b" : "w";
+
+    if (isInCheck(newBoard, nextTurn) && !hasAnyLegalMove(newBoard, nextTurn)) {
+      setStatus(`${turn === "w" ? "White" : "Black"} wins by checkmate`);
+    } else if (
+      !isInCheck(newBoard, nextTurn) &&
+      !hasAnyLegalMove(newBoard, nextTurn)
+    ) {
+      setStatus("Draw by stalemate");
+    } else if (isOnlyKings(newBoard)) {
+      setStatus("Draw: Only kings remain");
+    } else {
+      setStatus(nextTurn === "w" ? "White to move" : "Black to move");
+    }
+
+    setTurn(nextTurn);
+    setSelected(null);
+  };
+
+  const handleCellClick = (row, col) => {
+    if (selected) {
+      const [fromRow, fromCol] = selected;
+      handleMove(fromRow, fromCol, row, col);
+    } else if (board[row][col]?.color === turn) {
+      setSelected([row, col]);
+    } else {
+      setSelected(null);
+    }
+  };
+
+  const handleDrop = (e, toRow, toCol) => {
+    const fromRow = parseInt(e.dataTransfer.getData("fromRow"));
+    const fromCol = parseInt(e.dataTransfer.getData("fromCol"));
+    handleMove(fromRow, fromCol, toRow, toCol);
   };
 
   const restartGame = () => {
@@ -165,21 +158,37 @@ export default function ChessBoard() {
           alignItems: "center",
         }}
       >
-        <div className="board">
+        <div className="board" role="grid">
           {board.map((row, rIndex) =>
             row.map((cell, cIndex) => {
               const isSelected =
-                selected && selected[0] === rIndex && selected[1] === cIndex;
+                selected &&
+                selected[0] === rIndex &&
+                selected[1] === cIndex;
 
               return (
                 <div
                   key={`${rIndex}-${cIndex}`}
+                   role="gridcell"
                   className={`cell ${
                     (rIndex + cIndex) % 2 === 0 ? "light" : "dark"
                   } ${isSelected ? "hovered" : ""}`}
                   onClick={() => handleCellClick(rIndex, cIndex)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handleDrop(e, rIndex, cIndex)}
                 >
-                  {cell ? cell.symbol : ""}
+                  {cell && (
+                    <div
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("fromRow", rIndex);
+                        e.dataTransfer.setData("fromCol", cIndex);
+                      }}
+                      style={{ cursor: "grab" }}
+                    >
+                      {cell.symbol}
+                    </div>
+                  )}
                 </div>
               );
             })
