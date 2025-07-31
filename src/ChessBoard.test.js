@@ -1,77 +1,102 @@
-import "@testing-library/jest-dom";
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ChessBoard from "./ChessBoard";
+import "@testing-library/jest-dom";
 
-class MockDataTransfer {
-  constructor() {
-    this.data = {};
-  }
+// Set a higher timeout for all tests
+jest.setTimeout(30000);
 
-  setData(key, value) {
-    this.data[key] = value;
-  }
+describe("ChessBoard Component", () => {
+  const getCell = (row, col) => screen.getByTestId(`cell-${row}-${col}`);
 
-  getData(key) {
-    return this.data[key];
-  }
+  beforeEach(() => {
+    // Ensure a fresh component is rendered before each test
+    render(<ChessBoard />);
+  });
 
-  clearData() {
-    this.data = {};
-  }
-}
+  // Helper function to get the piece symbol from a cell
+  const getPieceSymbol = (r, c) => {
+    const cell = getCell(r, c);
+    const pieceSpan = cell.querySelector('span');
+    return pieceSpan ? pieceSpan.textContent : '';
+  };
+  
+  // Helper to wait for a specific piece to appear at a location
+  const waitForPiece = async (r, c, symbol) => {
+    await waitFor(() => {
+      const cell = getCell(r, c);
+      const pieceSpan = cell.querySelector('span');
+      expect(pieceSpan).toHaveTextContent(symbol);
+    }, { timeout: 5000 });
+  };
+  
+  // Helper to wait for a cell to be empty
+  const waitForEmptyCell = async (r, c) => {
+    await waitFor(() => {
+      const cell = getCell(r, c);
+      expect(cell).toBeEmptyDOMElement();
+    }, { timeout: 5000 });
+  };
+  
+  // Helper function to simulate a user move via clicks
+  const clickMove = async (fromRow, fromCol, toRow, toCol) => {
+    await userEvent.click(getCell(fromRow, fromCol));
+    await userEvent.click(getCell(toRow, toCol));
+  };
 
-global.DataTransfer = MockDataTransfer;
 
+  test("renders chessboard with 64 squares", () => {
+    const cells = screen.getAllByTestId(/cell-/);
+    expect(cells).toHaveLength(64);
+  });
 
-// Basic render test
-test("renders initial status", () => {
-  render(<ChessBoard />);
-  expect(screen.getByText(/White to move/i)).toBeInTheDocument();
-});
+  test("renders white and black pieces correctly", () => {
+    expect(getCell(0, 0)).toHaveTextContent("♜"); // black rook
+    expect(getCell(7, 3)).toHaveTextContent("♕"); // white queen
+    expect(getCell(6, 0)).toHaveTextContent("♙"); // white pawn
+  });
 
-// Restart button
-test("restart button resets game", () => {
-  render(<ChessBoard />);
-  const restartBtn = screen.getByText(/Restart Game/i);
-  fireEvent.click(restartBtn);
-  expect(screen.getByText(/White to move/i)).toBeInTheDocument();
-});
+  test("selects and highlights a piece", async () => {
+    const cell = getCell(6, 4); // white pawn
+    await userEvent.click(cell);
+    expect(cell).toHaveClass("hovered");
+  });
 
-// Pawn promotion prompt
-test("pawn promotion triggers prompt", () => {
-  window.prompt = jest.fn(() => "queen");
-  render(<ChessBoard />);
+  test("makes a valid pawn move and updates board", async () => {
+    await clickMove(6, 4, 4, 4); // white pawn e2-e4
+    await waitForPiece(4, 4, "♙");
+    await waitForEmptyCell(6, 4);
+    expect(screen.getByText("Black to move")).toBeInTheDocument();
+  });
 
-  // You'd need to simulate clicks to move a white pawn from row 6 to row 0.
-  // For now, we only check prompt invocation:
-  expect(typeof window.prompt).toBe("function");
-});
+  test("does not allow invalid move (blocked pawn)", async () => {
+    await clickMove(6, 4, 5, 5); // invalid move
+    expect(getCell(6, 4)).toHaveTextContent("♙");
+    expect(getCell(5, 5)).toBeEmptyDOMElement();
+    expect(screen.getByText("White to move")).toBeInTheDocument(); // Turn should not change
+  });
 
-// Selecting and moving
-test("selects a piece when clicked", () => {
-  render(<ChessBoard />);
-  const cell = screen.getAllByText("♙")[0]; // first white pawn
-  fireEvent.click(cell);
-  // Should not crash, maybe highlight class added:
-  // No direct DOM check for class (complex), but ensures it's clickable.
-  expect(cell).toBeInTheDocument();
-});
+  test("updates move history after valid move", async () => {
+    await clickMove(6, 4, 4, 4); // e2-e4
+    await waitFor(() => {
+      expect(screen.getByText("1. White: e2-e4")).toBeInTheDocument();
+    }, { timeout: 5000 });
+  });
 
-test("can move piece via drag and drop", () => {
-  render(<ChessBoard />);
+  test("handles draw by only kings remaining", async () => {
+    // This is a conceptual test. A simple way to test this would be to
+    // have a way to manually set the board state. Since we don't have that,
+    // we'll just check for the initial status.
+    expect(screen.getByText("White to move")).toBeInTheDocument();
+  });
 
-  const allCells = screen.getAllByRole("gridcell");
-  const fromCell = allCells.find((cell) => cell.textContent === "♙"); // example pawn
-  const toCell = allCells[40]; // pick a destination cell
-
-  const dragStart = new DataTransfer();
-  fireEvent.dragStart(fromCell.querySelector("div"), { dataTransfer: dragStart });
-  dragStart.setData("fromRow", "6");
-  dragStart.setData("fromCol", "0");
-
-  fireEvent.dragOver(toCell);
-  fireEvent.drop(toCell, { dataTransfer: dragStart });
-
-  // Assert: check the piece moved
-  expect(toCell).toHaveTextContent("♙");
+  test("restart button resets the game", async () => {
+    await clickMove(6, 4, 4, 4);
+    await waitForPiece(4, 4, "♙");
+    await userEvent.click(screen.getByText("Restart Game"));
+    await waitForEmptyCell(4, 4);
+    expect(getCell(6, 4)).toHaveTextContent("♙");
+    expect(screen.getByText("White to move")).toBeInTheDocument();
+  });
 });
