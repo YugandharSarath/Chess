@@ -18,12 +18,7 @@
     "Must ignore clicks after game over until restart"
   ],
 "companies":[
-  "Turing.com",
-  "CRED",
-  "Razorpay",
-  "Meesho",
-  "FrontRow",
-  "InterviewBit / Scaler Academy"
+  "Facebook (Meta), Amazon, Google, and Microsoft. VMWare, Adobe, and Yahoo. TCS, JP-morgan, and Infosys."
 ], 
   "duration": "3-4 hours",
   "test_cases": [

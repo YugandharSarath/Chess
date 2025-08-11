@@ -1,4 +1,4 @@
-### `Hints.md`
+### 💡 Hints
 
 This document provides a guide to the project's structure and the core concepts behind its implementation. The project is modular, separating the UI, game logic, and state management into distinct files.
 
