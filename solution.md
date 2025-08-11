@@ -650,6 +650,7 @@ export function getWinnerMessage(winner, status) {
 
 ## styles/main.css
 
+```css
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #2c3e50;
@@ -809,3 +810,4 @@ button {
 button:hover {
   background-color: #f39c12;
 }
+```
