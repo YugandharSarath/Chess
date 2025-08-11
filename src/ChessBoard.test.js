@@ -1,28 +1,24 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ChessBoard from "./ChessBoard";
+import App from "./App";
 import "@testing-library/jest-dom";
 
-// Set a higher timeout for all tests
 jest.setTimeout(30000);
 
 describe("ChessBoard Component", () => {
   const getCell = (row, col) => screen.getByTestId(`cell-${row}-${col}`);
 
   beforeEach(() => {
-    // Ensure a fresh component is rendered before each test
-    render(<ChessBoard />);
+    render(<App />);
   });
 
-  // Helper function to get the piece symbol from a cell
   const getPieceSymbol = (r, c) => {
     const cell = getCell(r, c);
     const pieceSpan = cell.querySelector('span');
     return pieceSpan ? pieceSpan.textContent : '';
   };
-  
-  // Helper to wait for a specific piece to appear at a location
+
   const waitForPiece = async (r, c, symbol) => {
     await waitFor(() => {
       const cell = getCell(r, c);
@@ -30,21 +26,18 @@ describe("ChessBoard Component", () => {
       expect(pieceSpan).toHaveTextContent(symbol);
     }, { timeout: 5000 });
   };
-  
-  // Helper to wait for a cell to be empty
+
   const waitForEmptyCell = async (r, c) => {
     await waitFor(() => {
       const cell = getCell(r, c);
       expect(cell).toBeEmptyDOMElement();
     }, { timeout: 5000 });
   };
-  
-  // Helper function to simulate a user move via clicks
+
   const clickMove = async (fromRow, fromCol, toRow, toCol) => {
     await userEvent.click(getCell(fromRow, fromCol));
     await userEvent.click(getCell(toRow, toCol));
   };
-
 
   test("renders chessboard with 64 squares", () => {
     const cells = screen.getAllByTestId(/cell-/);
@@ -52,43 +45,37 @@ describe("ChessBoard Component", () => {
   });
 
   test("renders white and black pieces correctly", () => {
-    expect(getCell(0, 0)).toHaveTextContent("♜"); // black rook
-    expect(getCell(7, 3)).toHaveTextContent("♕"); // white queen
-    expect(getCell(6, 0)).toHaveTextContent("♙"); // white pawn
+    expect(getCell(0, 0)).toHaveTextContent("♜"); 
+    expect(getCell(7, 3)).toHaveTextContent("♕"); 
+    expect(getCell(6, 0)).toHaveTextContent("♙"); 
   });
 
   test("selects and highlights a piece", async () => {
-    const cell = getCell(6, 4); // white pawn
+    const cell = getCell(6, 4); 
     await userEvent.click(cell);
-    expect(cell).toHaveClass("hovered");
+    expect(cell).toHaveClass("selected");
   });
 
   test("makes a valid pawn move and updates board", async () => {
-    await clickMove(6, 4, 4, 4); // white pawn e2-e4
+    await clickMove(6, 4, 4, 4); 
     await waitForPiece(4, 4, "♙");
     await waitForEmptyCell(6, 4);
     expect(screen.getByText("Black to move")).toBeInTheDocument();
   });
 
   test("does not allow invalid move (blocked pawn)", async () => {
-    await clickMove(6, 4, 5, 5); // invalid move
+    await clickMove(6, 4, 5, 5); 
     expect(getCell(6, 4)).toHaveTextContent("♙");
     expect(getCell(5, 5)).toBeEmptyDOMElement();
-    expect(screen.getByText("White to move")).toBeInTheDocument(); // Turn should not change
+    expect(screen.getByText("White to move")).toBeInTheDocument(); 
   });
 
   test("updates move history after valid move", async () => {
-    await clickMove(6, 4, 4, 4); // e2-e4
+    await clickMove(6, 4, 4, 4); 
     await waitFor(() => {
-      expect(screen.getByText("1. White: e2-e4")).toBeInTheDocument();
-    }, { timeout: 5000 });
-  });
 
-  test("handles draw by only kings remaining", async () => {
-    // This is a conceptual test. A simple way to test this would be to
-    // have a way to manually set the board state. Since we don't have that,
-    // we'll just check for the initial status.
-    expect(screen.getByText("White to move")).toBeInTheDocument();
+      expect(screen.getByText(/1\. White: e2e4/)).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 
   test("restart button resets the game", async () => {

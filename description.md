@@ -1,66 +1,50 @@
-
----
-
-## ♟️ Chess Game
+## ♟️ React Chess Game
 
 ### 👨‍🎓 Problem Statement
 
-Build a **React-based chess game** that allows **two players** to play a full match on a standard 8×8 board. The app must enforce all legal chess rules, handle player turns, track move history in standard notation, detect check/checkmate/stalemate, and provide a clear game status with appropriate end-game handling.
+Build a **two-player chess game** using React that adheres to all standard rules. The application must feature a full 8×8 board, validate all legal moves, handle special conditions like check and checkmate, and track the game's progress.
 
 ---
 
 ### ✅ Requirements
 
-1. **Create a standard 8×8 chessboard** with all pieces placed in their initial positions (White at bottom, Black at top).
-2. Each piece must move only according to **standard chess rules**:
+1.  **Board and Pieces**: Create a standard 8×8 grid with all chess pieces in their initial positions. White pieces should be on the bottom, and Black on the top.
 
-   * Pawn, Rook, Knight, Bishop, Queen, King.
-3. **White always moves first**, followed by alternating turns.
-4. The app must:
+2.  **Move Validation**: Implement comprehensive logic to ensure each piece moves according to standard chess rules (Pawn, Rook, Knight, Bishop, Queen, King).
 
-   * Validate all moves (illegal moves and self-checks must be prevented).
-   * Track and display **move history in chess notation** (e.g., `1. e2-e4`).
-   * Detect and handle:
+3.  **Turn-Based Gameplay**: The game must start with White, and players must take alternating turns. An invalid move should not change the turn.
 
-     * **Check**
-     * **Checkmate**
-     * **Stalemate**
-     * **Draw due to insufficient material** (e.g., only two kings remain)
-   * Support **pawn promotion** with a prompt (choose: Queen, Rook, Bishop, Knight).
-   * Support **castling** (both king-side and queen-side) under legal conditions:
+4.  **Special Rules & Game State**:
+    * **Check & Checkmate**: Detect when a king is in check. A checkmate occurs when a king is in check and has no legal moves to escape.
+    * **Stalemate**: Declare a draw by stalemate if the current player is not in check but has no legal moves.
+    * **Draw by Insufficient Material**: Recognize a draw when the only pieces remaining are the two kings.
+    * **Pawn Promotion**: When a pawn reaches the opposite end of the board, prompt the player to promote it to a Queen, Rook, Bishop, or Knight.
+    * **Castling**: Implement both king-side and queen-side castling, but only under the legal conditions (king and rook haven't moved, the path is clear, and the king doesn't move into or through check).
 
-     * Neither the king nor the castling rook has moved.
-     * No pieces between them.
-     * The king is not in check, does not pass through check, and does not end up in check.
-5. **Show a "Game Over" modal** when the match ends with a message:
-
-   * “White wins by checkmate”
-   * “Black wins by checkmate”
-   * “Draw by stalemate”
-   * “Draw: Only kings remain”
-6. Provide a **"Restart Game"** button that:
-
-   * Resets the board to the initial state.
-   * Clears move history and game status.
-   * Allows new moves.
+5.  **User Interface**:
+    * Display a clear **game status** (e.g., "White to move", "Black wins by checkmate").
+    * Maintain and show a **move history** in standard algebraic notation (e.g., `1. e4`, `1... e5`).
+    * Present a **"Game Over" modal** with the final result.
+    * Include a **"Restart Game"** button that resets the board, history, and status.
 
 ---
 
 ### ⚠️ Edge Cases & Constraints
 
-* Any move that would place or leave the **player’s own king in check** must be treated as illegal and blocked.
-* After a game-ending condition occurs (checkmate, stalemate, or draw), the board must become **non-interactive** until the user clicks **"Restart Game"**.
-* Castling is only allowed under strict rules (see #4).
-* When a **pawn reaches the last rank**, the app must **prompt the user to promote** it to Queen, Rook, Bishop, or Knight.
-* The move history should always show **proper turn-based notation**:
+* **Self-Check**: An essential rule to enforce is that any move that would leave the player's own king in check is illegal.
+* **Non-Interactive Board**: After a game-ending condition (checkmate, stalemate, draw), the board must be non-interactive until the game is restarted.
+* **Correct Notation**: The move history must accurately reflect the turn number and player.
+* **Visuals**: The board must render exactly 64 squares and use chess symbols for the pieces.
 
-  ```
-  1. e2-e4
-  1... e7-e5
-  2. Nf3 Nc6
-  ```
-* The board must always render **exactly 64 squares** and reflect correct piece positions using chess symbols (♙, ♘, ♖, etc.).
-* If only the two kings remain on the board, declare the game a **draw due to insufficient material**.
+---
 
+### 🧪 Testability Requirements
 
+To ensure the provided automated tests function correctly, your solution must include the following `data-testid` attributes on the specified components:
 
+* **Board**: The main board container should have `data-testid="board"`.
+* **Cells**: Each cell on the board must have a `data-testid` in the format `cell-{row}-{col}`, where `row` and `col` are their zero-indexed coordinates (e.g., `cell-0-0`, `cell-7-7`).
+* **Restart Button**: The restart button should have `data-testid="restart-button"`.
+* **Game Status**: The element displaying the game's current status (e.g., "White to move") should have `data-testid="game-status"`.
+* **Game Over Modal**: The modal or container for the "Game Over" screen should have `data-testid="game-over-modal"`.
+* **Winner Message**: The message inside the modal that declares the winner (e.g., "White wins by checkmate!") should have `data-testid="winner-message"`.
