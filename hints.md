@@ -38,31 +38,26 @@ export default function App() {
   const [gameStatus, setGameStatus] = useState("playing");
 
   const handleMove = (from, to) => {
-    // Check if the move is valid using the chessLogic function
+
     if (!isValidMove(board, from[0], from[1], to[0], to[1], turn)) {
       setSelected(null);
       return;
     }
-    
-    // ... logic for creating new board state ...
 
-    // Update state after a successful move
     setBoard(newBoard);
     setSelected(null);
     setTurn(nextTurn);
-    
-    // Check for game-ending conditions
+
     const nextPlayerInCheck = isInCheck(newBoard, nextTurn);
     const nextPlayerHasLegalMoves = hasAnyLegalMove(newBoard, nextTurn);
-    
+
     if (nextPlayerInCheck && !nextPlayerHasLegalMoves) {
-        setGameStatus("over"); // Checkmate
+        setGameStatus("over"); 
     } else if (!nextPlayerHasLegalMoves) {
-        setGameStatus("stalemate"); // Stalemate
+        setGameStatus("stalemate"); 
     }
   };
-  
-  // ... rest of the component ...
+
 }
 ```
 
@@ -77,22 +72,19 @@ export function isValidMove(board, fromRow, fromCol, toRow, toCol, turn) {
   const piece = board[fromRow][fromCol];
   if (!piece || piece.color !== turn) return false;
 
-  // Simulate the move on a temporary board
   const tempBoard = board.map((r) => [...r]);
   const movedPieceCopy = { ...piece };
   tempBoard[toRow][toCol] = movedPieceCopy;
   tempBoard[fromRow][fromCol] = null;
 
-  // Check if the move leaves the king in check
   if (isInCheck(tempBoard, turn)) return false;
 
-  // Use a switch statement to call the correct piece-specific logic
   switch (piece.type) {
     case "pawn":
       return pawnMove(piece, fromRow, fromCol, toRow, toCol, board);
     case "rook":
       return rookMove(fromRow, fromCol, toRow, toCol, board);
-    // ... other piece moves ...
+
     default:
       return false;
   }
@@ -107,7 +99,7 @@ export function isInCheck(board, color) {
 }
 
 export function isSquareAttacked(board, r, c, attackingColor) {
-  // Directly check if any of the opponent's pieces can attack the square
+
   for (let fr = 0; fr < 8; fr++) {
     for (let fc = 0; fc < 8; fc++) {
       const piece = board[fr][fc];
@@ -116,7 +108,7 @@ export function isSquareAttacked(board, r, c, attackingColor) {
         switch (piece.type) {
           case 'pawn': isAttacking = pawnMove(piece, fr, fc, r, c, board); break;
           case 'rook': isAttacking = rookMove(fr, fc, r, c, board); break;
-          // ... other piece move checks ...
+
         }
         if (isAttacking) {
           return true;

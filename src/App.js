@@ -34,29 +34,26 @@ export default function App() {
     const piece = newBoard[from[0]][from[1]];
     const capturedPiece = newBoard[to[0]][to[1]];
 
-    // Handle Castling
     if (
       piece.type === "king" &&
       Math.abs(to[1] - from[1]) === 2
     ) {
       if (to[1] === 6) {
-        // King-side castle
+
         const rook = newBoard[to[0]][7];
         newBoard[to[0]][5] = { ...rook, hasMoved: true };
         newBoard[to[0]][7] = null;
       } else if (to[1] === 2) {
-        // Queen-side castle
+
         const rook = newBoard[to[0]][0];
         newBoard[to[0]][3] = { ...rook, hasMoved: true };
         newBoard[to[0]][0] = null;
       }
     }
 
-    // Move the piece
     newBoard[to[0]][to[1]] = { ...piece, hasMoved: true };
     newBoard[from[0]][from[1]] = null;
 
-    // Pawn Promotion check
     if (piece.type === "pawn" && (to[0] === 0 || to[0] === 7)) {
       setPromotePawn({ from, to });
       setBoard(newBoard);
@@ -69,7 +66,7 @@ export default function App() {
     const nextPlayerInCheck = isInCheck(newBoard, nextTurn);
 
     if (nextPlayerInCheck && !nextPlayerHasLegalMoves) {
-      // Checkmate, the current player wins
+
       setGameStatus("over");
       setBoard(newBoard);
       setSelected(null);
@@ -81,14 +78,13 @@ export default function App() {
       ]);
       return;
     } else if (!nextPlayerHasLegalMoves) {
-      // Stalemate
+
       setGameStatus("stalemate");
     } else if (isOnlyKings(newBoard)) {
-      // Draw by insufficient material
+
       setGameStatus("draw");
     }
 
-    // Regular move, update board and turn
     setBoard(newBoard);
     setSelected(null);
     setTurn(nextTurn);
@@ -104,7 +100,6 @@ export default function App() {
     const newBoard = board.map((row) => [...row]);
     const { from, to } = promotePawn;
 
-    // Correctly determine the pawn's color from the board
     const pieceColor = to[0] === 0 ? "w" : "b";
 
     let promotedPiece = {};
